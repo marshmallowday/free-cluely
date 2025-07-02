@@ -1,5 +1,4 @@
 "use strict";
-// electron/WindowHelper.ts
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -70,7 +69,6 @@ class WindowHelper {
             x: this.currentX,
             y: 0,
             webPreferences: {
-                nodeIntegration: true,
                 contextIsolation: true,
                 preload: node_path_1.default.join(__dirname, "preload.js")
             },

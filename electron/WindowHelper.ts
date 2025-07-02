@@ -82,7 +82,6 @@ export class WindowHelper {
       x: this.currentX,
       y: 0,
       webPreferences: {
-        nodeIntegration: true,
         contextIsolation: true,
         preload: path.join(__dirname, "preload.js")
       },
