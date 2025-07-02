@@ -10,6 +10,7 @@ exports.PROCESSING_EVENTS = {
     INITIAL_START: "initial-start",
     PROBLEM_EXTRACTED: "problem-extracted",
     SOLUTION_SUCCESS: "solution-success",
+    SOLUTION_TOKEN: "solution-token",
     INITIAL_SOLUTION_ERROR: "solution-error",
     //states for processing the debugging
     DEBUG_START: "debug-start",
@@ -98,6 +99,13 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
         electron_1.ipcRenderer.on(exports.PROCESSING_EVENTS.SOLUTION_SUCCESS, subscription);
         return () => {
             electron_1.ipcRenderer.removeListener(exports.PROCESSING_EVENTS.SOLUTION_SUCCESS, subscription);
+        };
+    },
+    onSolutionToken: (callback) => {
+        const subscription = (_, token) => callback(token);
+        electron_1.ipcRenderer.on(exports.PROCESSING_EVENTS.SOLUTION_TOKEN, subscription);
+        return () => {
+            electron_1.ipcRenderer.removeListener(exports.PROCESSING_EVENTS.SOLUTION_TOKEN, subscription);
         };
     },
     onUnauthorized: (callback) => {

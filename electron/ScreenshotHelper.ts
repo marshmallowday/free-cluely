@@ -35,6 +35,22 @@ export class ScreenshotHelper {
     }
   }
 
+  private isPathInsideDir(filePath: string, dir: string): boolean {
+    const relative = path.relative(dir, filePath)
+    return !relative.startsWith("..") && !path.isAbsolute(relative)
+  }
+
+  private validatePath(filePath: string): string {
+    const resolved = path.resolve(filePath)
+    if (
+      !this.isPathInsideDir(resolved, this.screenshotDir) &&
+      !this.isPathInsideDir(resolved, this.extraScreenshotDir)
+    ) {
+      throw new Error("Path outside allowed directories")
+    }
+    return resolved
+  }
+
   public getView(): "queue" | "solutions" {
     return this.view
   }
@@ -119,7 +135,8 @@ export class ScreenshotHelper {
 
   public async getImagePreview(filepath: string): Promise<string> {
     try {
-      const data = await fs.promises.readFile(filepath)
+      const resolved = this.validatePath(filepath)
+      const data = await fs.promises.readFile(resolved)
       return `data:image/png;base64,${data.toString("base64")}`
     } catch (error) {
       console.error("Error reading image:", error)
@@ -131,14 +148,15 @@ export class ScreenshotHelper {
     path: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await fs.promises.unlink(path)
+      const resolved = this.validatePath(path)
+      await fs.promises.unlink(resolved)
       if (this.view === "queue") {
         this.screenshotQueue = this.screenshotQueue.filter(
-          (filePath) => filePath !== path
+          (filePath) => filePath !== resolved
         )
       } else {
         this.extraScreenshotQueue = this.extraScreenshotQueue.filter(
-          (filePath) => filePath !== path
+          (filePath) => filePath !== resolved
         )
       }
       return { success: true }

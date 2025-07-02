@@ -9,7 +9,7 @@ interface ElectronAPI {
   getScreenshots: () => Promise<Array<{ path: string; preview: string }>>
   deleteScreenshot: (
     path: string
-  ) => Promise<{ success: boolean; error?: string }>
+  ) => Promise<{ success: boolean; error?: string }> // fails if path is outside allowed directories
   onScreenshotTaken: (
     callback: (data: { path: string; preview: string }) => void
   ) => () => void
@@ -31,8 +31,12 @@ interface ElectronAPI {
   moveWindowLeft: () => Promise<void>
   moveWindowRight: () => Promise<void>
   analyzeAudioFromBase64: (data: string, mimeType: string) => Promise<{ text: string; timestamp: number }>
-  analyzeAudioFile: (path: string) => Promise<{ text: string; timestamp: number }>
-  analyzeImageFile: (path: string) => Promise<{ text: string; timestamp: number }>
+  analyzeAudioFile: (
+    path: string
+  ) => Promise<{ text: string; timestamp: number }> // only allowed screenshot paths
+  analyzeImageFile: (
+    path: string
+  ) => Promise<{ text: string; timestamp: number }> // only allowed screenshot paths
   quitApp: () => Promise<void>
 }
 
@@ -61,7 +65,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   takeScreenshot: () => ipcRenderer.invoke("take-screenshot"),
   getScreenshots: () => ipcRenderer.invoke("get-screenshots"),
   deleteScreenshot: (path: string) =>
-    ipcRenderer.invoke("delete-screenshot", path),
+    ipcRenderer.invoke("delete-screenshot", path), // fails for invalid paths
 
   // Event listeners
   onScreenshotTaken: (
@@ -175,7 +179,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),
   moveWindowRight: () => ipcRenderer.invoke("move-window-right"),
   analyzeAudioFromBase64: (data: string, mimeType: string) => ipcRenderer.invoke("analyze-audio-base64", data, mimeType),
-  analyzeAudioFile: (path: string) => ipcRenderer.invoke("analyze-audio-file", path),
-  analyzeImageFile: (path: string) => ipcRenderer.invoke("analyze-image-file", path),
+  analyzeAudioFile: (path: string) =>
+    ipcRenderer.invoke("analyze-audio-file", path), // fails for invalid paths
+  analyzeImageFile: (path: string) =>
+    ipcRenderer.invoke("analyze-image-file", path), // fails for invalid paths
   quitApp: () => ipcRenderer.invoke("quit-app")
 } as ElectronAPI)

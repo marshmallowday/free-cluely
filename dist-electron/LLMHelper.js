@@ -6,9 +6,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LLMHelper = void 0;
 const generative_ai_1 = require("@google/generative-ai");
 const fs_1 = __importDefault(require("fs"));
+const node_path_1 = __importDefault(require("node:path"));
+const electron_1 = require("electron");
 class LLMHelper {
     model;
     systemPrompt = `You are Wingman AI, a helpful, proactive assistant for any kind of problem or situation (not just coding). For any user input, analyze the situation, provide a clear problem statement, relevant context, and suggest several possible responses or actions the user could take next. Always explain your reasoning. Present your suggestions as a list of options or next steps.`;
+    screenshotDir = node_path_1.default.join(electron_1.app.getPath("userData"), "screenshots");
+    extraScreenshotDir = node_path_1.default.join(electron_1.app.getPath("userData"), "extra_screenshots");
+    isPathInsideDir(filePath, dir) {
+        const relative = node_path_1.default.relative(dir, filePath);
+        return !relative.startsWith("..") && !node_path_1.default.isAbsolute(relative);
+    }
+    validatePath(filePath) {
+        const resolved = node_path_1.default.resolve(filePath);
+        if (!this.isPathInsideDir(resolved, this.screenshotDir) &&
+            !this.isPathInsideDir(resolved, this.extraScreenshotDir)) {
+            throw new Error("Path outside allowed directories");
+        }
+        return resolved;
+    }
     constructor(apiKey) {
         const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
         this.model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -48,7 +64,7 @@ class LLMHelper {
             throw error;
         }
     }
-    async generateSolution(problemInfo) {
+    async generateSolution(problemInfo, onToken) {
         const prompt = `${this.systemPrompt}\n\nGiven this problem or situation:\n${JSON.stringify(problemInfo, null, 2)}\n\nPlease provide your response in the following JSON format:\n{
   "solution": {
     "code": "The code or main answer here.",
@@ -60,13 +76,32 @@ class LLMHelper {
 }\nImportant: Return ONLY the JSON object, without any markdown formatting or code blocks.`;
         console.log("[LLMHelper] Calling Gemini LLM for solution...");
         try {
-            const result = await this.model.generateContent(prompt);
-            console.log("[LLMHelper] Gemini LLM returned result.");
-            const response = await result.response;
-            const text = this.cleanJsonResponse(response.text());
-            const parsed = JSON.parse(text);
-            console.log("[LLMHelper] Parsed LLM response:", parsed);
-            return parsed;
+            const hasStream = typeof this.model.generateContentStream === "function";
+            if (hasStream) {
+                const streamResult = await this.model.generateContentStream(prompt);
+                let aggregated = "";
+                for await (const chunk of streamResult.stream) {
+                    const part = chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    if (part) {
+                        aggregated += part;
+                        onToken?.(part);
+                    }
+                }
+                const finalResponse = await streamResult.response;
+                const text = this.cleanJsonResponse(finalResponse.text());
+                const parsed = JSON.parse(text);
+                console.log("[LLMHelper] Parsed LLM response:", parsed);
+                return parsed;
+            }
+            else {
+                const result = await this.model.generateContent(prompt);
+                console.log("[LLMHelper] Gemini LLM returned result.");
+                const response = await result.response;
+                const text = this.cleanJsonResponse(response.text());
+                const parsed = JSON.parse(text);
+                console.log("[LLMHelper] Parsed LLM response:", parsed);
+                return parsed;
+            }
         }
         catch (error) {
             console.error("[LLMHelper] Error in generateSolution:", error);
@@ -99,7 +134,8 @@ class LLMHelper {
     }
     async analyzeAudioFile(audioPath) {
         try {
-            const audioData = await fs_1.default.promises.readFile(audioPath);
+            const resolved = this.validatePath(audioPath);
+            const audioData = await fs_1.default.promises.readFile(resolved);
             const audioPart = {
                 inlineData: {
                     data: audioData.toString("base64"),
@@ -138,7 +174,8 @@ class LLMHelper {
     }
     async analyzeImageFile(imagePath) {
         try {
-            const imageData = await fs_1.default.promises.readFile(imagePath);
+            const resolved = this.validatePath(imagePath);
+            const imageData = await fs_1.default.promises.readFile(resolved);
             const imagePart = {
                 inlineData: {
                     data: imageData.toString("base64"),
