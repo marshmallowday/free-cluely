@@ -10,7 +10,8 @@
     "electron:dev": "tsc -p electron/tsconfig.json && electron .",
     "app:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env electron .\"",
     "app:build": "npm run build && electron-builder",
-    "watch": "tsc -p electron/tsconfig.json --watch"
+    "watch": "tsc -p electron/tsconfig.json --watch",
+    "test": "vitest run"
   },
   "build": {
     "appId": "com.electron.interview-coder",
@@ -83,6 +84,7 @@
     "vite": "^5.4.11",
     "vite-plugin-electron": "^0.28.8",
     "vite-plugin-electron-renderer": "^0.14.6",
+    "vitest": "^3.2.4",
     "wait-on": "^8.0.1"
   },
   "dependencies": {
