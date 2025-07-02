@@ -30,6 +30,18 @@ class ScreenshotHelper {
             node_fs_1.default.mkdirSync(this.extraScreenshotDir);
         }
     }
+    isPathInsideDir(filePath, dir) {
+        const relative = node_path_1.default.relative(dir, filePath);
+        return !relative.startsWith("..") && !node_path_1.default.isAbsolute(relative);
+    }
+    validatePath(filePath) {
+        const resolved = node_path_1.default.resolve(filePath);
+        if (!this.isPathInsideDir(resolved, this.screenshotDir) &&
+            !this.isPathInsideDir(resolved, this.extraScreenshotDir)) {
+            throw new Error("Path outside allowed directories");
+        }
+        return resolved;
+    }
     getView() {
         return this.view;
     }
@@ -100,7 +112,8 @@ class ScreenshotHelper {
     }
     async getImagePreview(filepath) {
         try {
-            const data = await node_fs_1.default.promises.readFile(filepath);
+            const resolved = this.validatePath(filepath);
+            const data = await node_fs_1.default.promises.readFile(resolved);
             return `data:image/png;base64,${data.toString("base64")}`;
         }
         catch (error) {
@@ -110,12 +123,13 @@ class ScreenshotHelper {
     }
     async deleteScreenshot(path) {
         try {
-            await node_fs_1.default.promises.unlink(path);
+            const resolved = this.validatePath(path);
+            await node_fs_1.default.promises.unlink(resolved);
             if (this.view === "queue") {
-                this.screenshotQueue = this.screenshotQueue.filter((filePath) => filePath !== path);
+                this.screenshotQueue = this.screenshotQueue.filter((filePath) => filePath !== resolved);
             }
             else {
-                this.extraScreenshotQueue = this.extraScreenshotQueue.filter((filePath) => filePath !== path);
+                this.extraScreenshotQueue = this.extraScreenshotQueue.filter((filePath) => filePath !== resolved);
             }
             return { success: true };
         }

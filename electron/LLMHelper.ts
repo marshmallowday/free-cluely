@@ -1,9 +1,33 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
 import fs from "fs"
+import path from "node:path"
+import { app } from "electron"
 
 export class LLMHelper {
   private model: GenerativeModel
   private readonly systemPrompt = `You are Wingman AI, a helpful, proactive assistant for any kind of problem or situation (not just coding). For any user input, analyze the situation, provide a clear problem statement, relevant context, and suggest several possible responses or actions the user could take next. Always explain your reasoning. Present your suggestions as a list of options or next steps.`
+
+  private readonly screenshotDir = path.join(app.getPath("userData"), "screenshots")
+  private readonly extraScreenshotDir = path.join(
+    app.getPath("userData"),
+    "extra_screenshots"
+  )
+
+  private isPathInsideDir(filePath: string, dir: string): boolean {
+    const relative = path.relative(dir, filePath)
+    return !relative.startsWith("..") && !path.isAbsolute(relative)
+  }
+
+  private validatePath(filePath: string): string {
+    const resolved = path.resolve(filePath)
+    if (
+      !this.isPathInsideDir(resolved, this.screenshotDir) &&
+      !this.isPathInsideDir(resolved, this.extraScreenshotDir)
+    ) {
+      throw new Error("Path outside allowed directories")
+    }
+    return resolved
+  }
 
   constructor(apiKey: string) {
     const genAI = new GoogleGenerativeAI(apiKey)
@@ -121,7 +145,8 @@ export class LLMHelper {
 
   public async analyzeAudioFile(audioPath: string) {
     try {
-      const audioData = await fs.promises.readFile(audioPath);
+      const resolved = this.validatePath(audioPath)
+      const audioData = await fs.promises.readFile(resolved);
       const audioPart = {
         inlineData: {
           data: audioData.toString("base64"),
@@ -160,7 +185,8 @@ export class LLMHelper {
 
   public async analyzeImageFile(imagePath: string) {
     try {
-      const imageData = await fs.promises.readFile(imagePath);
+      const resolved = this.validatePath(imagePath)
+      const imageData = await fs.promises.readFile(resolved);
       const imagePart = {
         inlineData: {
           data: imageData.toString("base64"),

@@ -2,6 +2,23 @@
 
 import { ipcMain, app } from "electron"
 import { AppState } from "./main"
+import path from "node:path"
+
+const screenshotDir = path.join(app.getPath("userData"), "screenshots")
+const extraScreenshotDir = path.join(app.getPath("userData"), "extra_screenshots")
+
+const isPathInsideDir = (filePath: string, dir: string): boolean => {
+  const relative = path.relative(dir, filePath)
+  return !relative.startsWith("..") && !path.isAbsolute(relative)
+}
+
+const validatePath = (filePath: string): string => {
+  const resolved = path.resolve(filePath)
+  if (!isPathInsideDir(resolved, screenshotDir) && !isPathInsideDir(resolved, extraScreenshotDir)) {
+    throw new Error("Invalid path")
+  }
+  return resolved
+}
 
 export function initializeIpcHandlers(appState: AppState): void {
   ipcMain.handle(
@@ -13,8 +30,13 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   )
 
-  ipcMain.handle("delete-screenshot", async (event, path: string) => {
-    return appState.deleteScreenshot(path)
+  ipcMain.handle("delete-screenshot", async (event, filePath: string) => {
+    try {
+      const resolved = validatePath(filePath)
+      return await appState.deleteScreenshot(resolved)
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
   })
 
   ipcMain.handle("take-screenshot", async () => {
@@ -90,9 +112,10 @@ export function initializeIpcHandlers(appState: AppState): void {
   })
 
   // IPC handler for analyzing audio from file path
-  ipcMain.handle("analyze-audio-file", async (event, path: string) => {
+  ipcMain.handle("analyze-audio-file", async (event, filePath: string) => {
     try {
-      const result = await appState.processingHelper.processAudioFile(path)
+      const resolved = validatePath(filePath)
+      const result = await appState.processingHelper.processAudioFile(resolved)
       return result
     } catch (error: any) {
       console.error("Error in analyze-audio-file handler:", error)
@@ -101,9 +124,12 @@ export function initializeIpcHandlers(appState: AppState): void {
   })
 
   // IPC handler for analyzing image from file path
-  ipcMain.handle("analyze-image-file", async (event, path: string) => {
+  ipcMain.handle("analyze-image-file", async (event, filePath: string) => {
     try {
-      const result = await appState.processingHelper.getLLMHelper().analyzeImageFile(path)
+      const resolved = validatePath(filePath)
+      const result = await appState.processingHelper
+        .getLLMHelper()
+        .analyzeImageFile(resolved)
       return result
     } catch (error: any) {
       console.error("Error in analyze-image-file handler:", error)

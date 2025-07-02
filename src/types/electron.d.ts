@@ -4,7 +4,9 @@ export interface ElectronAPI {
     height: number
   }) => Promise<void>
   getScreenshots: () => Promise<Array<{ path: string; preview: string }>>
-  deleteScreenshot: (path: string) => Promise<{ success: boolean; error?: string }>
+  deleteScreenshot: (
+    path: string
+  ) => Promise<{ success: boolean; error?: string }> // fails for invalid paths
   onScreenshotTaken: (callback: (data: { path: string; preview: string }) => void) => () => void
   onSolutionsReady: (callback: (solutions: string) => void) => () => void
   onResetView: (callback: () => void) => () => void
@@ -23,8 +25,12 @@ export interface ElectronAPI {
   moveWindowLeft: () => Promise<void>
   moveWindowRight: () => Promise<void>
   analyzeAudioFromBase64: (data: string, mimeType: string) => Promise<{ text: string; timestamp: number }>
-  analyzeAudioFile: (path: string) => Promise<{ text: string; timestamp: number }>
-  analyzeImageFile: (path: string) => Promise<{ text: string; timestamp: number }>
+  analyzeAudioFile: (
+    path: string
+  ) => Promise<{ text: string; timestamp: number }> // only allowed screenshot paths
+  analyzeImageFile: (
+    path: string
+  ) => Promise<{ text: string; timestamp: number }> // only allowed screenshot paths
   quitApp: () => Promise<void>
 }
 
