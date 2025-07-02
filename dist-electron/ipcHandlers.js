@@ -50,6 +50,12 @@ function initializeIpcHandlers(appState) {
     electron_1.ipcMain.handle("toggle-window", async () => {
         appState.toggleMainWindow();
     });
+    electron_1.ipcMain.handle("move-window-left", async () => {
+        appState.moveWindowLeft();
+    });
+    electron_1.ipcMain.handle("move-window-right", async () => {
+        appState.moveWindowRight();
+    });
     electron_1.ipcMain.handle("reset-queues", async () => {
         try {
             appState.clearQueues();
