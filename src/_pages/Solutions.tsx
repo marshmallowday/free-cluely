@@ -186,7 +186,7 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
     setToastOpen(true)
   }
 
-  const handleDeleteExtraScreenshot = async (index: number) => {
+  const handleDeleteExtraScreenshot = async (index: number): Promise<void> => {
     const screenshotToDelete = extraScreenshots[index]
 
     try {

@@ -9,7 +9,7 @@ interface Screenshot {
 
 interface ScreenshotItemProps {
   screenshot: Screenshot
-  onDelete: (index: number) => void
+  onDelete: (index: number) => Promise<void>
   index: number
   isLoading: boolean
 }
