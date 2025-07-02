@@ -18,7 +18,8 @@ export interface ElectronAPI {
   onSolutionToken: (callback: (token: string) => void) => () => void
   onUnauthorized: (callback: () => void) => () => void
   onDebugError: (callback: (error: string) => void) => () => void
-  takeScreenshot: () => Promise<void>
+  // Capture a screenshot and return its file path and preview data
+  takeScreenshot: () => Promise<{ path: string; preview: string }>
   moveWindowLeft: () => Promise<void>
   moveWindowRight: () => Promise<void>
   analyzeAudioFromBase64: (data: string, mimeType: string) => Promise<{ text: string; timestamp: number }>
