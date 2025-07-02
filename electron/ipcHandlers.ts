@@ -59,6 +59,14 @@ export function initializeIpcHandlers(appState: AppState): void {
     appState.toggleMainWindow()
   })
 
+  ipcMain.handle("move-window-left", async () => {
+    appState.moveWindowLeft()
+  })
+
+  ipcMain.handle("move-window-right", async () => {
+    appState.moveWindowRight()
+  })
+
   ipcMain.handle("reset-queues", async () => {
     try {
       appState.clearQueues()
