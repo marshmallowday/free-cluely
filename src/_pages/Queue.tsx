@@ -55,7 +55,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
     setToastOpen(true)
   }
 
-  const handleDeleteScreenshot = async (index: number) => {
+  const handleDeleteScreenshot = async (index: number): Promise<void> => {
     const screenshotToDelete = screenshots[index]
 
     try {

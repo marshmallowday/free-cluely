@@ -9,7 +9,7 @@ interface Screenshot {
 interface ScreenshotQueueProps {
   isLoading: boolean
   screenshots: Screenshot[]
-  onDeleteScreenshot: (index: number) => void
+  onDeleteScreenshot: (index: number) => Promise<void>
 }
 const ScreenshotQueue: React.FC<ScreenshotQueueProps> = ({
   isLoading,

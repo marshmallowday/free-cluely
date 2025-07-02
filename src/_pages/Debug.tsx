@@ -249,7 +249,7 @@ const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing }) => {
     setToastOpen(true)
   }
 
-  const handleDeleteExtraScreenshot = async (index: number) => {
+  const handleDeleteExtraScreenshot = async (index: number): Promise<void> => {
     const screenshotToDelete = extraScreenshots[index]
 
     try {
