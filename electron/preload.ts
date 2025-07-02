@@ -22,6 +22,7 @@ interface ElectronAPI {
   onProcessingNoScreenshots: (callback: () => void) => () => void
   onProblemExtracted: (callback: (data: any) => void) => () => void
   onSolutionSuccess: (callback: (data: any) => void) => () => void
+  onSolutionToken: (callback: (token: string) => void) => () => void
 
   onUnauthorized: (callback: () => void) => () => void
   onDebugError: (callback: (error: string) => void) => () => void
@@ -43,6 +44,7 @@ export const PROCESSING_EVENTS = {
   INITIAL_START: "initial-start",
   PROBLEM_EXTRACTED: "problem-extracted",
   SOLUTION_SUCCESS: "solution-success",
+  SOLUTION_TOKEN: "solution-token",
   INITIAL_SOLUTION_ERROR: "solution-error",
 
   //states for processing the debugging
@@ -148,6 +150,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => {
       ipcRenderer.removeListener(
         PROCESSING_EVENTS.SOLUTION_SUCCESS,
+        subscription
+      )
+    }
+  },
+  onSolutionToken: (callback: (token: string) => void) => {
+    const subscription = (_: any, token: string) => callback(token)
+    ipcRenderer.on(PROCESSING_EVENTS.SOLUTION_TOKEN, subscription)
+    return () => {
+      ipcRenderer.removeListener(
+        PROCESSING_EVENTS.SOLUTION_TOKEN,
         subscription
       )
     }

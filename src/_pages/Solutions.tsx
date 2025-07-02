@@ -1,4 +1,5 @@
 // Solutions.tsx
+/// <reference path="../types/electron.d.ts" />
 import React, { useState, useEffect, useRef } from "react"
 import { useQuery, useQueryClient } from "react-query"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -341,6 +342,9 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
         setThoughtsData(solutionData.thoughts || null)
         setTimeComplexityData(solutionData.time_complexity || null)
         setSpaceComplexityData(solutionData.space_complexity || null)
+      }),
+      window.electronAPI.onSolutionToken((token: string) => {
+        setSolutionData((prev) => (prev || "") + token)
       }),
 
       //########################################################

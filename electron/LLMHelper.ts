@@ -49,7 +49,7 @@ export class LLMHelper {
     }
   }
 
-  public async generateSolution(problemInfo: any) {
+  public async generateSolution(problemInfo: any, onToken?: (token: string) => void) {
     const prompt = `${this.systemPrompt}\n\nGiven this problem or situation:\n${JSON.stringify(problemInfo, null, 2)}\n\nPlease provide your response in the following JSON format:\n{
   "solution": {
     "code": "The code or main answer here.",
@@ -62,13 +62,31 @@ export class LLMHelper {
 
     console.log("[LLMHelper] Calling Gemini LLM for solution...");
     try {
-      const result = await this.model.generateContent(prompt)
-      console.log("[LLMHelper] Gemini LLM returned result.");
-      const response = await result.response
-      const text = this.cleanJsonResponse(response.text())
-      const parsed = JSON.parse(text)
-      console.log("[LLMHelper] Parsed LLM response:", parsed)
-      return parsed
+      const hasStream = typeof (this.model as any).generateContentStream === "function"
+      if (hasStream) {
+        const streamResult = await (this.model as any).generateContentStream(prompt)
+        let aggregated = ""
+        for await (const chunk of streamResult.stream) {
+          const part = chunk.candidates?.[0]?.content?.parts?.[0]?.text || ""
+          if (part) {
+            aggregated += part
+            onToken?.(part)
+          }
+        }
+        const finalResponse = await streamResult.response
+        const text = this.cleanJsonResponse(finalResponse.text())
+        const parsed = JSON.parse(text)
+        console.log("[LLMHelper] Parsed LLM response:", parsed)
+        return parsed
+      } else {
+        const result = await this.model.generateContent(prompt)
+        console.log("[LLMHelper] Gemini LLM returned result.");
+        const response = await result.response
+        const text = this.cleanJsonResponse(response.text())
+        const parsed = JSON.parse(text)
+        console.log("[LLMHelper] Parsed LLM response:", parsed)
+        return parsed
+      }
     } catch (error) {
       console.error("[LLMHelper] Error in generateSolution:", error);
       throw error;

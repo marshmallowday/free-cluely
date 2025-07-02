@@ -100,7 +100,14 @@ export class ProcessingHelper {
         }
 
         // Get current solution from state
-        const currentSolution = await this.llmHelper.generateSolution(problemInfo)
+        const currentSolution = await this.llmHelper.generateSolution(
+          problemInfo,
+          (token) =>
+            mainWindow.webContents.send(
+              this.appState.PROCESSING_EVENTS.SOLUTION_TOKEN,
+              token
+            )
+        )
         const currentCode = currentSolution.solution.code
 
         // Debug the solution using vision model
