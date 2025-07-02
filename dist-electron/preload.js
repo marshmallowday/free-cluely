@@ -59,9 +59,10 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
         };
     },
     onDebugSuccess: (callback) => {
-        electron_1.ipcRenderer.on("debug-success", (_event, data) => callback(data));
+        const subscription = (_event, data) => callback(data);
+        electron_1.ipcRenderer.on("debug-success", subscription);
         return () => {
-            electron_1.ipcRenderer.removeListener("debug-success", (_event, data) => callback(data));
+            electron_1.ipcRenderer.removeListener("debug-success", subscription);
         };
     },
     onDebugError: (callback) => {
