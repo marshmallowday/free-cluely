@@ -36,6 +36,7 @@ export class AppState {
     INITIAL_START: "initial-start",
     PROBLEM_EXTRACTED: "problem-extracted",
     SOLUTION_SUCCESS: "solution-success",
+    SOLUTION_TOKEN: "solution-token",
     INITIAL_SOLUTION_ERROR: "solution-error",
 
     //states for processing the debugging

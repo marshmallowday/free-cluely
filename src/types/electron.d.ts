@@ -15,6 +15,7 @@ export interface ElectronAPI {
   onProcessingNoScreenshots: (callback: () => void) => () => void
   onProblemExtracted: (callback: (data: any) => void) => () => void
   onSolutionSuccess: (callback: (data: any) => void) => () => void
+  onSolutionToken: (callback: (token: string) => void) => () => void
   onUnauthorized: (callback: () => void) => () => void
   onDebugError: (callback: (error: string) => void) => () => void
   takeScreenshot: () => Promise<void>
@@ -30,4 +31,6 @@ declare global {
   interface Window {
     electronAPI: ElectronAPI
   }
-} 
+}
+
+export {}
