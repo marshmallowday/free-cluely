@@ -45,7 +45,10 @@ export class ProcessingHelper {
         mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.INITIAL_START);
         this.appState.setView('solutions');
         try {
-          const audioResult = await this.llmHelper.analyzeAudioFile(lastPath);
+          const audioResult = await this.llmHelper.analyzeAudioFile(
+            lastPath,
+            this.currentProcessingAbortController.signal
+          );
           mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.PROBLEM_EXTRACTED, audioResult);
           this.appState.setProblemInfo({ problem_statement: audioResult.text, input_format: {}, output_format: {}, constraints: [], test_cases: [] });
           return;
@@ -61,7 +64,10 @@ export class ProcessingHelper {
       this.appState.setView("solutions")
       this.currentProcessingAbortController = new AbortController()
       try {
-        const imageResult = await this.llmHelper.analyzeImageFile(lastPath);
+        const imageResult = await this.llmHelper.analyzeImageFile(
+          lastPath,
+          this.currentProcessingAbortController.signal
+        );
         const problemInfo = {
           problem_statement: imageResult.text,
           input_format: { description: "Generated from screenshot", parameters: [] as any[] },
@@ -106,7 +112,8 @@ export class ProcessingHelper {
             mainWindow.webContents.send(
               this.appState.PROCESSING_EVENTS.SOLUTION_TOKEN,
               token
-            )
+            ),
+          this.currentExtraProcessingAbortController.signal
         )
         const currentCode = currentSolution.solution.code
 
@@ -114,7 +121,8 @@ export class ProcessingHelper {
         const debugResult = await this.llmHelper.debugSolutionWithImages(
           problemInfo,
           currentCode,
-          extraScreenshotQueue
+          extraScreenshotQueue,
+          this.currentExtraProcessingAbortController.signal
         )
 
         this.appState.setHasDebugged(true)
