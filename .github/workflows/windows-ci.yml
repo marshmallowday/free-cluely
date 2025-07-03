@@ -2,8 +2,13 @@ name: Windows CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - ci/windows
   pull_request:
+    branches:
+      - main
+      - ci/windows
 
 jobs:
   build:
