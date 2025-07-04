@@ -1,9 +1,12 @@
 import { app, BrowserWindow } from "electron"
+
+import { ProblemStatementData } from "../src/types/solutions"
+
 import { initializeIpcHandlers } from "./ipcHandlers"
-import { WindowHelper } from "./WindowHelper"
+import { ProcessingHelper } from "./ProcessingHelper"
 import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
-import { ProcessingHelper } from "./ProcessingHelper"
+import { WindowHelper } from "./WindowHelper"
 
 export class AppState {
   private static instance: AppState | null = null
@@ -16,13 +19,7 @@ export class AppState {
   // View management
   private view: "queue" | "solutions" = "queue"
 
-  private problemInfo: {
-    problem_statement: string
-    input_format: Record<string, any>
-    output_format: Record<string, any>
-    constraints: Array<Record<string, any>>
-    test_cases: Array<Record<string, any>>
-  } | null = null // Allow null
+  private problemInfo: ProblemStatementData | null = null // Allow null
 
   private hasDebugged: boolean = false
 
@@ -88,11 +85,11 @@ export class AppState {
     return this.screenshotHelper
   }
 
-  public getProblemInfo(): any {
+  public getProblemInfo(): ProblemStatementData | null {
     return this.problemInfo
   }
 
-  public setProblemInfo(problemInfo: any): void {
+  public setProblemInfo(problemInfo: ProblemStatementData): void {
     this.problemInfo = problemInfo
   }
 

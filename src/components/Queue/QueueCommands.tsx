@@ -119,7 +119,9 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         <div className="flex items-center gap-2">
           <button
             className={`bg-white/10 hover:bg-white/20 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-white/70 flex items-center gap-1 ${isRecording ? 'bg-red-500/70 hover:bg-red-500/90' : ''}`}
-            onClick={handleRecordClick}
+            onClick={() => {
+              void handleRecordClick()
+            }}
             type="button"
           >
             {isRecording ? (
@@ -215,11 +217,13 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         <div className="mx-2 h-4 w-px bg-white/20" />
 
         {/* Sign Out Button - Moved to end */}
-        <button
-          className="text-red-500/70 hover:text-red-500/90 transition-colors hover:cursor-pointer"
-          title="Sign Out"
-          onClick={() => window.electronAPI.quitApp()}
-        >
+          <button
+            className="text-red-500/70 hover:text-red-500/90 transition-colors hover:cursor-pointer"
+            title="Sign Out"
+            onClick={() => {
+              void window.electronAPI.quitApp()
+            }}
+          >
           <IoLogOutOutline className="w-4 h-4" />
         </button>
       </div>
