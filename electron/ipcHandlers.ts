@@ -1,8 +1,9 @@
 // ipcHandlers.ts
 
 import { ipcMain, app } from "electron"
-import { AppState } from "./main"
 import path from "node:path"
+
+import { AppState } from "./main"
 
 const screenshotDir = path.join(app.getPath("userData"), "screenshots")
 const extraScreenshotDir = path.join(app.getPath("userData"), "extra_screenshots")
@@ -34,8 +35,9 @@ export function initializeIpcHandlers(appState: AppState): void {
     try {
       const resolved = validatePath(filePath)
       return await appState.deleteScreenshot(resolved)
-    } catch (error: any) {
-      return { success: false, error: error.message }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      return { success: false, error: message }
     }
   })
 
@@ -94,9 +96,10 @@ export function initializeIpcHandlers(appState: AppState): void {
       appState.clearQueues()
       console.log("Screenshot queues have been cleared.")
       return { success: true }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error resetting queues:", error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      return { success: false, error: message }
     }
   })
 
@@ -105,7 +108,7 @@ export function initializeIpcHandlers(appState: AppState): void {
     try {
       const result = await appState.processingHelper.processAudioBase64(data, mimeType)
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error in analyze-audio-base64 handler:", error)
       throw error
     }
@@ -117,7 +120,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       const resolved = validatePath(filePath)
       const result = await appState.processingHelper.processAudioFile(resolved)
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error in analyze-audio-file handler:", error)
       throw error
     }
@@ -131,7 +134,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         .getLLMHelper()
         .analyzeImageFile(resolved)
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error in analyze-image-file handler:", error)
       throw error
     }

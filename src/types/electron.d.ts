@@ -1,3 +1,14 @@
+import { ProblemStatementData } from './solutions'
+
+export interface SolutionResult {
+  solution: {
+    code: string
+    thoughts: string[]
+    time_complexity: string
+    space_complexity: string
+  }
+}
+
 export interface ElectronAPI {
   updateContentDimensions: (dimensions: {
     width: number
@@ -12,11 +23,11 @@ export interface ElectronAPI {
   onResetView: (callback: () => void) => () => void
   onSolutionStart: (callback: () => void) => () => void
   onDebugStart: (callback: () => void) => () => void
-  onDebugSuccess: (callback: (data: any) => void) => () => void
+  onDebugSuccess: (callback: (data: SolutionResult) => void) => () => void
   onSolutionError: (callback: (error: string) => void) => () => void
   onProcessingNoScreenshots: (callback: () => void) => () => void
-  onProblemExtracted: (callback: (data: any) => void) => () => void
-  onSolutionSuccess: (callback: (data: any) => void) => () => void
+  onProblemExtracted: (callback: (data: ProblemStatementData) => void) => () => void
+  onSolutionSuccess: (callback: (data: SolutionResult) => void) => () => void
   onSolutionToken: (callback: (token: string) => void) => () => void
   onUnauthorized: (callback: () => void) => () => void
   onDebugError: (callback: (error: string) => void) => () => void

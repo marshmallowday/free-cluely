@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
+import { app } from "electron"
 import fs from "fs"
 import path from "node:path"
-import { app } from "electron"
 
 export class LLMHelper {
   private model: GenerativeModel
@@ -15,10 +15,11 @@ export class LLMHelper {
 
   private async withAbortSignal<T>(signal: AbortSignal, fn: () => Promise<T>): Promise<T> {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = (input: any, init: any = {}) => {
-      const combined = init.signal
-        ? (AbortSignal as any).any([init.signal, signal])
-        : signal
+    globalThis.fetch = (input: RequestInfo | URL, init: RequestInit = {}) => {
+      const abortAny = (AbortSignal as unknown as {
+        any(signals: AbortSignal[]): AbortSignal
+      }).any
+      const combined = init.signal ? abortAny([init.signal, signal]) : signal
       return originalFetch(input, { ...init, signal: combined })
     }
     try {
@@ -105,9 +106,9 @@ export class LLMHelper {
 
     console.log("[LLMHelper] Calling Gemini LLM for solution...");
     try {
-      const hasStream = typeof (this.model as any).generateContentStream === "function"
+      const hasStream = typeof (this.model as unknown as { generateContentStream?: (p: string) => any }).generateContentStream === 'function'
       if (hasStream) {
-        const streamResult = await (this.model as any).generateContentStream(prompt)
+        const streamResult = await (this.model as unknown as { generateContentStream: (p: string) => any }).generateContentStream(prompt)
         let aggregated = ""
         for await (const chunk of streamResult.stream) {
           const part = chunk.candidates?.[0]?.content?.parts?.[0]?.text || ""
