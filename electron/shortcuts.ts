@@ -1,4 +1,5 @@
 import { globalShortcut, app } from "electron"
+
 import { AppState } from "./main" // Adjust the import path if necessary
 
 export class ShortcutsHelper {
@@ -20,7 +21,7 @@ export class ShortcutsHelper {
             path: screenshotPath,
             preview
           })
-        } catch (error) {
+        } catch (error: unknown) {
           console.error("Error capturing screenshot:", error)
         }
       }

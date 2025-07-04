@@ -1,14 +1,28 @@
 import js from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import importPlugin from 'eslint-plugin-import';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import perfectionist from 'eslint-plugin-perfectionist';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import importPlugin from 'eslint-plugin-import';
 import unused from 'eslint-plugin-unused-imports';
-import perfectionist from 'eslint-plugin-perfectionist';
 
 export default [
+  {
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        electronAPI: 'readonly',
+        document: 'readonly',
+        process: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        navigator: 'readonly',
+        console: 'readonly'
+      }
+    }
+  },
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -48,6 +62,6 @@ export default [
     },
   },
   {
-    ignores: ['dist', 'dist-electron', 'node_modules'],
+    ignores: ['dist', 'dist-electron', 'node_modules', 'worker-script', 'vitest.config.ts'],
   },
 ];
