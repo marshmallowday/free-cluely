@@ -1,8 +1,9 @@
 // ProcessingHelper.ts
 
-import { AppState } from "./main"
-import { LLMHelper } from "./LLMHelper"
 import dotenv from "dotenv"
+
+import { LLMHelper } from "./LLMHelper"
+import { AppState } from "./main"
 
 dotenv.config()
 
@@ -52,9 +53,10 @@ export class ProcessingHelper {
           mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.PROBLEM_EXTRACTED, audioResult);
           this.appState.setProblemInfo({ problem_statement: audioResult.text, input_format: {}, output_format: {}, constraints: [], test_cases: [] });
           return;
-        } catch (err: any) {
-          console.error('Audio processing error:', err);
-          mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR, err.message);
+        } catch (err: unknown) {
+          const error = err as Error
+          console.error('Audio processing error:', error);
+          mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR, error.message);
           return;
         }
       }
@@ -70,18 +72,19 @@ export class ProcessingHelper {
         );
         const problemInfo = {
           problem_statement: imageResult.text,
-          input_format: { description: "Generated from screenshot", parameters: [] as any[] },
+          input_format: { description: "Generated from screenshot", parameters: [] as unknown[] },
           output_format: { description: "Generated from screenshot", type: "string", subtype: "text" },
           complexity: { time: "N/A", space: "N/A" },
-          test_cases: [] as any[],
+          test_cases: [] as unknown[],
           validation_type: "manual",
           difficulty: "custom"
         };
         mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.PROBLEM_EXTRACTED, problemInfo);
         this.appState.setProblemInfo(problemInfo);
-      } catch (error: any) {
-        console.error("Image processing error:", error)
-        mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR, error.message)
+      } catch (error: unknown) {
+        const err = error as Error
+        console.error("Image processing error:", err)
+        mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR, err.message)
       } finally {
         this.currentProcessingAbortController = null
       }
@@ -131,11 +134,12 @@ export class ProcessingHelper {
           debugResult
         )
 
-      } catch (error: any) {
-        console.error("Debug processing error:", error)
+      } catch (error: unknown) {
+        const err = error as Error
+        console.error("Debug processing error:", err)
         mainWindow.webContents.send(
           this.appState.PROCESSING_EVENTS.DEBUG_ERROR,
-          error.message
+          err.message
         )
       } finally {
         this.currentExtraProcessingAbortController = null

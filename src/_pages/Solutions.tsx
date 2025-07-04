@@ -6,6 +6,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism"
 
 import ScreenshotQueue from "../components/Queue/ScreenshotQueue"
+import SolutionCommands from "../components/Solutions/SolutionCommands"
 import {
   Toast,
   ToastDescription,
@@ -13,9 +14,8 @@ import {
   ToastTitle,
   ToastVariant
 } from "../components/ui/toast"
-import { ProblemStatementData } from "../types/solutions"
 import { AudioResult } from "../types/audio"
-import SolutionCommands from "../components/Solutions/SolutionCommands"
+import { ProblemStatementData } from "../types/solutions"
 import Debug from "./Debug"
 
 // (Using global ElectronAPI type from src/types/electron.d.ts)
@@ -322,19 +322,27 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
         console.error("Processing error:", error)
       }),
       //when the initial solution is generated, we'll set the solution data to that
-      window.electronAPI.onSolutionSuccess((data) => {
-        if (!data?.solution) {
+      window.electronAPI.onSolutionSuccess((data: unknown) => {
+        const typed = data as {
+          solution?: {
+            code: string
+            thoughts: unknown
+            time_complexity: unknown
+            space_complexity: unknown
+          }
+        }
+        if (!typed?.solution) {
           console.warn("Received empty or invalid solution data")
           return
         }
 
-        console.log({ solution: data.solution })
+        console.log({ solution: typed.solution })
 
         const solutionData = {
-          code: data.solution.code,
-          thoughts: data.solution.thoughts,
-          time_complexity: data.solution.time_complexity,
-          space_complexity: data.solution.space_complexity
+          code: typed.solution.code as string,
+          thoughts: typed.solution.thoughts as string[],
+          time_complexity: typed.solution.time_complexity as string,
+          space_complexity: typed.solution.space_complexity as string
         }
 
         queryClient.setQueryData(["solution"], solutionData)
@@ -355,12 +363,15 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
         setDebugProcessing(true)
       }),
       //the first time debugging works, we'll set the view to debug and populate the cache with the data
-      window.electronAPI.onDebugSuccess((data) => {
-        console.log({ debug_data: data })
+        window.electronAPI.onDebugSuccess((data: unknown) => {
+          const typed = data as { solution?: unknown }
+          console.log({ debug_data: typed })
 
-        queryClient.setQueryData(["new_solution"], data.solution)
-        setDebugProcessing(false)
-      }),
+          if (typed.solution) {
+            queryClient.setQueryData(["new_solution"], typed.solution)
+          }
+          setDebugProcessing(false)
+        }),
       //when there was an error in the initial debugging, we'll show a toast and stop the little generating pulsing thing.
       window.electronAPI.onDebugError(() => {
         showToast(
@@ -397,11 +408,13 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
           queryClient.getQueryData(["problem_statement"]) || null
         )
         // If this is from audio processing, show it in the custom content section
-        const audioResult = queryClient.getQueryData(["audio_result"]) as AudioResult | undefined;
-        if (audioResult) {
-          // Update all relevant sections when audio result is received
-          setProblemStatementData({
-            problem_statement: audioResult.text,
+          const audioResult = queryClient.getQueryData(["audio_result"]) as
+            | { text: string }
+            | undefined
+          if (audioResult) {
+            // Update all relevant sections when audio result is received
+            setProblemStatementData({
+              problem_statement: audioResult.text,
             input_format: {
               description: "Generated from audio input",
               parameters: []
