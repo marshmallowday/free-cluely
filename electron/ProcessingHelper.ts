@@ -1,8 +1,11 @@
 // ProcessingHelper.ts
 
-import { AppState } from "./main"
-import { LLMHelper } from "./LLMHelper"
 import dotenv from "dotenv"
+
+import type { Parameter, TestCase } from "../src/types/solutions"
+
+import { LLMHelper } from "./LLMHelper"
+import { AppState } from "./main"
 
 dotenv.config()
 
@@ -50,7 +53,7 @@ export class ProcessingHelper {
             this.currentProcessingAbortController.signal
           );
           mainWindow.webContents.send(this.appState.PROCESSING_EVENTS.PROBLEM_EXTRACTED, audioResult);
-          this.appState.setProblemInfo({ problem_statement: audioResult.text, input_format: {}, output_format: {}, constraints: [], test_cases: [] });
+          this.appState.setProblemInfo({ problem_statement: audioResult.text, input_format: {}, output_format: {}, constraints: [], test_cases: [] as TestCase[] });
           return;
         } catch (err: any) {
           console.error('Audio processing error:', err);
@@ -70,10 +73,10 @@ export class ProcessingHelper {
         );
         const problemInfo = {
           problem_statement: imageResult.text,
-          input_format: { description: "Generated from screenshot", parameters: [] as any[] },
+          input_format: { description: "Generated from screenshot", parameters: [] as Parameter[] },
           output_format: { description: "Generated from screenshot", type: "string", subtype: "text" },
           complexity: { time: "N/A", space: "N/A" },
-          test_cases: [] as any[],
+          test_cases: [] as TestCase[],
           validation_type: "manual",
           difficulty: "custom"
         };

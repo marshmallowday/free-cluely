@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { IoLogOutOutline } from "react-icons/io5"
 
 interface SolutionCommandsProps {
-  extraScreenshots: any[]
+  extraScreenshots: unknown[]
   onTooltipVisibilityChange?: (visible: boolean, height: number) => void
 }
 
@@ -202,7 +202,9 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
           <button
             className="text-red-500/70 hover:text-red-500/90 transition-colors hover:cursor-pointer"
             title="Sign Out"
-            onClick={() => window.electronAPI.quitApp()}
+            onClick={() => {
+              void window.electronAPI.quitApp()
+            }}
           >
             <IoLogOutOutline className="w-4 h-4" />
           </button>
