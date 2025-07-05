@@ -1,9 +1,10 @@
-import { ToastProvider } from "./components/ui/toast"
-import Queue from "./_pages/Queue"
 import { ToastViewport } from "@radix-ui/react-toast"
 import { useEffect, useRef, useState } from "react"
-import Solutions from "./_pages/Solutions"
 import { QueryClient, QueryClientProvider } from "react-query"
+
+import Queue from "./_pages/Queue"
+import Solutions from "./_pages/Solutions"
+import { ToastProvider } from "./components/ui/toast"
 
 // Global ElectronAPI type is defined in src/types/electron.d.ts
 
@@ -98,7 +99,7 @@ const App: React.FC = () => {
         setView("queue")
         console.log("View reset to 'queue' via Command+R shortcut")
       }),
-      window.electronAPI.onProblemExtracted((data: any) => {
+      window.electronAPI.onProblemExtracted((data: unknown) => {
         if (view === "queue") {
           console.log("Problem extracted successfully")
           queryClient.invalidateQueries(["problem_statement"])

@@ -6,6 +6,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism"
 
 import ScreenshotQueue from "../components/Queue/ScreenshotQueue"
+import SolutionCommands from "../components/Solutions/SolutionCommands"
 import {
   Toast,
   ToastDescription,
@@ -13,9 +14,8 @@ import {
   ToastTitle,
   ToastVariant
 } from "../components/ui/toast"
-import { ProblemStatementData } from "../types/solutions"
 import { AudioResult } from "../types/audio"
-import SolutionCommands from "../components/Solutions/SolutionCommands"
+import { ProblemStatementData } from "../types/solutions"
 import Debug from "./Debug"
 
 // (Using global ElectronAPI type from src/types/electron.d.ts)
@@ -323,18 +323,19 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
       }),
       //when the initial solution is generated, we'll set the solution data to that
       window.electronAPI.onSolutionSuccess((data) => {
-        if (!data?.solution) {
+        const payload = data as any
+        if (!payload?.solution) {
           console.warn("Received empty or invalid solution data")
           return
         }
 
-        console.log({ solution: data.solution })
+        console.log({ solution: payload.solution })
 
         const solutionData = {
-          code: data.solution.code,
-          thoughts: data.solution.thoughts,
-          time_complexity: data.solution.time_complexity,
-          space_complexity: data.solution.space_complexity
+          code: payload.solution.code,
+          thoughts: payload.solution.thoughts,
+          time_complexity: payload.solution.time_complexity,
+          space_complexity: payload.solution.space_complexity
         }
 
         queryClient.setQueryData(["solution"], solutionData)
@@ -356,9 +357,10 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
       }),
       //the first time debugging works, we'll set the view to debug and populate the cache with the data
       window.electronAPI.onDebugSuccess((data) => {
-        console.log({ debug_data: data })
+        const payload = data as any
+        console.log({ debug_data: payload })
 
-        queryClient.setQueryData(["new_solution"], data.solution)
+        queryClient.setQueryData(["new_solution"], payload.solution)
         setDebugProcessing(false)
       }),
       //when there was an error in the initial debugging, we'll show a toast and stop the little generating pulsing thing.
@@ -397,7 +399,7 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
           queryClient.getQueryData(["problem_statement"]) || null
         )
         // If this is from audio processing, show it in the custom content section
-        const audioResult = queryClient.getQueryData(["audio_result"]) as AudioResult | undefined;
+        const audioResult = queryClient.getQueryData(["audio_result"]) as any;
         if (audioResult) {
           // Update all relevant sections when audio result is received
           setProblemStatementData({

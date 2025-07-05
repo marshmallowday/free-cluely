@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
+import { app } from "electron"
 import fs from "fs"
 import path from "node:path"
-import { app } from "electron"
 
 export class LLMHelper {
   private model: GenerativeModel
@@ -15,7 +15,7 @@ export class LLMHelper {
 
   private async withAbortSignal<T>(signal: AbortSignal, fn: () => Promise<T>): Promise<T> {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = (input: any, init: any = {}) => {
+    globalThis.fetch = (input: RequestInfo | URL, init: RequestInit = {}) => {
       const combined = init.signal
         ? (AbortSignal as any).any([init.signal, signal])
         : signal
@@ -89,7 +89,7 @@ export class LLMHelper {
   }
 
   public async generateSolution(
-    problemInfo: any,
+    problemInfo: Record<string, unknown>,
     onToken?: (token: string) => void,
     signal?: AbortSignal
   ) {
@@ -137,7 +137,7 @@ export class LLMHelper {
   }
 
   public async debugSolutionWithImages(
-    problemInfo: any,
+    problemInfo: Record<string, unknown>,
     currentCode: string,
     debugImagePaths: string[],
     signal?: AbortSignal
