@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron"
 
+import type { ProblemStatementData } from "../src/types/solutions"
+
 // Types for the exposed Electron API
 interface ElectronAPI {
   updateContentDimensions: (dimensions: {
@@ -17,11 +19,11 @@ interface ElectronAPI {
   onResetView: (callback: () => void) => () => void
   onSolutionStart: (callback: () => void) => () => void
   onDebugStart: (callback: () => void) => () => void
-  onDebugSuccess: (callback: (data: any) => void) => () => void
+  onDebugSuccess: (callback: (data: ProblemStatementData) => void) => () => void
   onSolutionError: (callback: (error: string) => void) => () => void
   onProcessingNoScreenshots: (callback: () => void) => () => void
-  onProblemExtracted: (callback: (data: any) => void) => () => void
-  onSolutionSuccess: (callback: (data: any) => void) => () => void
+  onProblemExtracted: (callback: (data: ProblemStatementData) => void) => () => void
+  onSolutionSuccess: (callback: (data: ProblemStatementData) => void) => () => void
   onSolutionToken: (callback: (token: string) => void) => () => void
 
   onUnauthorized: (callback: () => void) => () => void
@@ -71,7 +73,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onScreenshotTaken: (
     callback: (data: { path: string; preview: string }) => void
   ) => {
-    const subscription = (_: any, data: { path: string; preview: string }) =>
+    const subscription = (_: unknown, data: { path: string; preview: string }) =>
       callback(data)
     ipcRenderer.on("screenshot-taken", subscription)
     return () => {
@@ -79,7 +81,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }
   },
   onSolutionsReady: (callback: (solutions: string) => void) => {
-    const subscription = (_: any, solutions: string) => callback(solutions)
+    const subscription = (_: unknown, solutions: string) => callback(solutions)
     ipcRenderer.on("solutions-ready", subscription)
     return () => {
       ipcRenderer.removeListener("solutions-ready", subscription)
@@ -107,22 +109,22 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }
   },
 
-  onDebugSuccess: (callback: (data: any) => void) => {
-    const subscription = (_event: any, data: any) => callback(data)
+  onDebugSuccess: (callback: (data: ProblemStatementData) => void) => {
+    const subscription = (_event: unknown, data: ProblemStatementData) => callback(data)
     ipcRenderer.on("debug-success", subscription)
     return () => {
       ipcRenderer.removeListener("debug-success", subscription)
     }
   },
   onDebugError: (callback: (error: string) => void) => {
-    const subscription = (_: any, error: string) => callback(error)
+    const subscription = (_: unknown, error: string) => callback(error)
     ipcRenderer.on(PROCESSING_EVENTS.DEBUG_ERROR, subscription)
     return () => {
       ipcRenderer.removeListener(PROCESSING_EVENTS.DEBUG_ERROR, subscription)
     }
   },
   onSolutionError: (callback: (error: string) => void) => {
-    const subscription = (_: any, error: string) => callback(error)
+    const subscription = (_: unknown, error: string) => callback(error)
     ipcRenderer.on(PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR, subscription)
     return () => {
       ipcRenderer.removeListener(
@@ -139,8 +141,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }
   },
 
-  onProblemExtracted: (callback: (data: any) => void) => {
-    const subscription = (_: any, data: any) => callback(data)
+  onProblemExtracted: (callback: (data: ProblemStatementData) => void) => {
+    const subscription = (_: unknown, data: ProblemStatementData) => callback(data)
     ipcRenderer.on(PROCESSING_EVENTS.PROBLEM_EXTRACTED, subscription)
     return () => {
       ipcRenderer.removeListener(
@@ -149,8 +151,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
       )
     }
   },
-  onSolutionSuccess: (callback: (data: any) => void) => {
-    const subscription = (_: any, data: any) => callback(data)
+  onSolutionSuccess: (callback: (data: ProblemStatementData) => void) => {
+    const subscription = (_: unknown, data: ProblemStatementData) => callback(data)
     ipcRenderer.on(PROCESSING_EVENTS.SOLUTION_SUCCESS, subscription)
     return () => {
       ipcRenderer.removeListener(
@@ -160,7 +162,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }
   },
   onSolutionToken: (callback: (token: string) => void) => {
-    const subscription = (_: any, token: string) => callback(token)
+    const subscription = (_: unknown, token: string) => callback(token)
     ipcRenderer.on(PROCESSING_EVENTS.SOLUTION_TOKEN, subscription)
     return () => {
       ipcRenderer.removeListener(

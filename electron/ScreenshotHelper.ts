@@ -1,10 +1,10 @@
 // ScreenshotHelper.ts
 
-import path from "node:path"
-import fs from "node:fs"
 import { app } from "electron"
-import { v4 as uuidv4 } from "uuid"
+import fs from "node:fs"
+import path from "node:path"
 import screenshot from "screenshot-desktop"
+import { v4 as uuidv4 } from "uuid"
 
 export class ScreenshotHelper {
   private screenshotQueue: string[] = []
@@ -107,7 +107,7 @@ export class ScreenshotHelper {
         if (removedPath) {
           try {
             await fs.promises.unlink(removedPath)
-          } catch (error) {
+          } catch (error: unknown) {
             console.error("Error removing old screenshot:", error)
           }
         }
@@ -122,7 +122,7 @@ export class ScreenshotHelper {
         if (removedPath) {
           try {
             await fs.promises.unlink(removedPath)
-          } catch (error) {
+          } catch (error: unknown) {
             console.error("Error removing old screenshot:", error)
           }
         }
@@ -138,7 +138,7 @@ export class ScreenshotHelper {
       const resolved = this.validatePath(filepath)
       const data = await fs.promises.readFile(resolved)
       return `data:image/png;base64,${data.toString("base64")}`
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error reading image:", error)
       throw error
     }
@@ -160,9 +160,12 @@ export class ScreenshotHelper {
         )
       }
       return { success: true }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error deleting file:", error)
-      return { success: false, error: error.message }
+      if (error instanceof Error) {
+        return { success: false, error: error.message }
+      }
+      return { success: false, error: 'Unknown error' }
     }
   }
 }

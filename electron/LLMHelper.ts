@@ -1,7 +1,9 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
+import { app } from "electron"
 import fs from "fs"
 import path from "node:path"
-import { app } from "electron"
+
+import type { ProblemStatementData } from "../src/types/solutions"
 
 export class LLMHelper {
   private model: GenerativeModel
@@ -15,9 +17,12 @@ export class LLMHelper {
 
   private async withAbortSignal<T>(signal: AbortSignal, fn: () => Promise<T>): Promise<T> {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = (input: any, init: any = {}) => {
+    globalThis.fetch = (input: RequestInfo | URL, init: RequestInit = {}) => {
       const combined = init.signal
-        ? (AbortSignal as any).any([init.signal, signal])
+        ? (AbortSignal as unknown as { any(signals: AbortSignal[]): AbortSignal }).any([
+            init.signal,
+            signal
+          ])
         : signal
       return originalFetch(input, { ...init, signal: combined })
     }
@@ -82,14 +87,14 @@ export class LLMHelper {
       const response = await result.response
       const text = this.cleanJsonResponse(response.text())
       return JSON.parse(text)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error extracting problem from images:", error)
       throw error
     }
   }
 
   public async generateSolution(
-    problemInfo: any,
+    problemInfo: ProblemStatementData,
     onToken?: (token: string) => void,
     signal?: AbortSignal
   ) {
@@ -130,14 +135,14 @@ export class LLMHelper {
         console.log("[LLMHelper] Parsed LLM response:", parsed)
         return parsed
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[LLMHelper] Error in generateSolution:", error);
       throw error;
     }
   }
 
   public async debugSolutionWithImages(
-    problemInfo: any,
+    problemInfo: ProblemStatementData,
     currentCode: string,
     debugImagePaths: string[],
     signal?: AbortSignal
@@ -160,7 +165,7 @@ export class LLMHelper {
         const parsed = JSON.parse(text)
         console.log("[LLMHelper] Parsed debug LLM response:", parsed)
         return parsed
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error debugging solution with images:", error)
         throw error
       }
@@ -187,7 +192,7 @@ export class LLMHelper {
         return { text, timestamp: Date.now() }
       }
       return signal ? this.withAbortSignal(signal, exec) : await exec()
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error analyzing audio file:", error);
       throw error;
     }
@@ -213,7 +218,7 @@ export class LLMHelper {
         return { text, timestamp: Date.now() }
       }
       return signal ? this.withAbortSignal(signal, exec) : await exec()
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error analyzing audio from base64:", error);
       throw error;
     }
@@ -237,7 +242,7 @@ export class LLMHelper {
         return { text, timestamp: Date.now() }
       }
       return signal ? this.withAbortSignal(signal, exec) : await exec()
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error analyzing image file:", error);
       throw error;
     }
