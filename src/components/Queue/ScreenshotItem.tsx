@@ -1,6 +1,6 @@
+import { X } from "lucide-react"
 // src/components/ScreenshotItem.tsx
 import React from "react"
-import { X } from "lucide-react"
 
 interface Screenshot {
   path: string
@@ -49,7 +49,7 @@ const ScreenshotItem: React.FC<ScreenshotItemProps> = ({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              handleDelete()
+              void handleDelete()
             }}
             className="absolute top-2 left-2 p-1 rounded-full bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             aria-label="Delete screenshot"
