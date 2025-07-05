@@ -1,9 +1,10 @@
 import { app, BrowserWindow } from "electron"
+
 import { initializeIpcHandlers } from "./ipcHandlers"
-import { WindowHelper } from "./WindowHelper"
+import { ProcessingHelper } from "./ProcessingHelper"
 import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
-import { ProcessingHelper } from "./ProcessingHelper"
+import { WindowHelper } from "./WindowHelper"
 
 export class AppState {
   private static instance: AppState | null = null
@@ -18,10 +19,10 @@ export class AppState {
 
   private problemInfo: {
     problem_statement: string
-    input_format: Record<string, any>
-    output_format: Record<string, any>
-    constraints: Array<Record<string, any>>
-    test_cases: Array<Record<string, any>>
+    input_format: Record<string, unknown>
+    output_format: Record<string, unknown>
+    constraints: Array<Record<string, unknown>>
+    test_cases: Array<Record<string, unknown>>
   } | null = null // Allow null
 
   private hasDebugged: boolean = false
@@ -88,11 +89,11 @@ export class AppState {
     return this.screenshotHelper
   }
 
-  public getProblemInfo(): any {
+  public getProblemInfo(): Record<string, unknown> | null {
     return this.problemInfo
   }
 
-  public setProblemInfo(problemInfo: any): void {
+  public setProblemInfo(problemInfo: Record<string, unknown>): void {
     this.problemInfo = problemInfo
   }
 

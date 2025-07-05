@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { IoLogOutOutline } from "react-icons/io5"
 
 interface SolutionCommandsProps {
-  extraScreenshots: any[]
+  extraScreenshots: Array<{ path: string; preview: string }>
   onTooltipVisibilityChange?: (visible: boolean, height: number) => void
 }
 
