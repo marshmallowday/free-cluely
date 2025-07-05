@@ -9,11 +9,23 @@ export interface SolutionsResponse {
   [key: string]: Solution
 }
 
+export interface ProblemParameter {
+  name: string
+  type: string
+  description?: string
+}
+
+export interface TestCase {
+  input: string
+  output: string
+  explanation?: string
+}
+
 export interface ProblemStatementData {
   problem_statement: string;
   input_format: {
     description: string;
-    parameters: any[];
+    parameters: ProblemParameter[];
   };
   output_format: {
     description: string;
@@ -24,7 +36,7 @@ export interface ProblemStatementData {
     time: string;
     space: string;
   };
-  test_cases: any[];
+  test_cases: TestCase[];
   validation_type: string;
   difficulty: string;
 }
