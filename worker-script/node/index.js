@@ -5,11 +5,12 @@ parentPort.on('message', async (message) => {
   try {
     // Process the message based on its type
     switch (message.type) {
-      case 'process':
+      case 'process': {
         // Add your processing logic here
         const result = await processTask(message.data);
         parentPort.postMessage({ type: 'result', data: result });
         break;
+      }
       
       default:
         parentPort.postMessage({ 
